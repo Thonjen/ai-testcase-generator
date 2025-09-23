@@ -1,6 +1,10 @@
 # 🤖 AI Test Case Generator
 
-An intelligent test case generator powered by Google's Gemini AI that creates comprehensive test cases from feature descriptions, requirements, or code snippets.
+An intelligent test case generator powered by Google's Gemini AI that creates comprehensive test cases from feature descriptions, requirements, or code snippets.  
+
+## 🌱 Why Build It?
+An AI Test Case Generator can start as a simple tool that drafts test cases from requirements, giving testers an overall idea of possible scenarios to build on. Over time, it can grow into a full QA platform by allowing testers to refine and manage cases, integrate with project tools, and even automate execution in CI/CD pipelines. This evolution makes testing faster, smarter, and more collaborative—helping teams catch issues earlier while improving coverage and efficiency.
+
 
 ## ✨ Features
 

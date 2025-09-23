@@ -40,10 +40,17 @@ export default function Home() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [uploadedFiles, setUploadedFiles] = useState<Array<{name: string, content: string, size: number}>>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [inputMode, setInputMode] = useState<'description' | 'files'>('description');
 
   const generateTestCases = async () => {
-    if (!input.trim()) {
+    // Check if user has provided either input description or uploaded files
+    if (inputMode === 'description' && !input.trim()) {
       setError('Please enter a requirement or description');
+      return;
+    }
+    
+    if (inputMode === 'files' && uploadedFiles.length === 0) {
+      setError('Please upload at least one reference file');
       return;
     }
 
@@ -58,9 +65,9 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          input: input.trim(),
+          input: inputMode === 'description' ? input.trim() : 'Analyze the uploaded files and generate comprehensive test cases',
           testType: testType.trim() || undefined,
-          uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+          uploadedFiles: inputMode === 'files' ? uploadedFiles : undefined,
         }),
       });
 
@@ -243,6 +250,17 @@ export default function Home() {
     setError(''); // Clear any previous errors if successful
   };
   
+  // Clear uploaded files when switching to description mode
+  const handleModeChange = (mode: 'description' | 'files') => {
+    setInputMode(mode);
+    setError(''); // Clear any errors when switching modes
+    if (mode === 'description') {
+      setUploadedFiles([]); // Clear uploaded files when switching to description mode
+    } else {
+      setInput(''); // Clear description when switching to files mode
+    }
+  };
+  
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
@@ -272,7 +290,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen font-mono flex" style={{ backgroundColor: '#1a1a1a', fontFamily: 'monospace', color: '#00ff00' }}>
+<div
+  className="min-h-screen flex bg-gradient-to-br from-gray-50 via-white to-gray-100"
+  style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#5d4e37' }}
+>
+
       {/* Main Content Area */}
       <div 
         className="min-h-screen transition-all duration-300 ease-in-out"
@@ -280,13 +302,44 @@ export default function Home() {
           width: result && sidebarOpen ? `${100 - sidebarWidth}%` : '100%'
         }}
       >
+        
+<header className="py-6 border-t border-gray-200 bg-gray-50">
+  <div className="max-w-5xl mx-auto px-4">
+    <div className="text-center">
+      <div className="flex items-center justify-center space-x-2 mb-4">
+        <div className="w-7 h-7 border border-gray-600 flex items-center justify-center text-gray-800 font-bold bg-white rounded">
+          T
+        </div> 
+        <h3 className="text-lg font-semibold text-gray-800">TestCase Generator</h3>
+      </div>
+      <p className="text-gray-600 mb-4 text-sm">
+        Powered by Google Gemini AI Free Tier
+      </p>
+      <div className="flex justify-center space-x-4 text-sm">
+        <a href="https://github.com/Thonjen/ai-testcase-generator" target="_blank" rel="noopener noreferrer" 
+           className="text-gray-700 hover:bg-gray-100 px-3 py-1 transition-colors border border-gray-300 rounded">
+          GitHub Repository
+        </a>
+        <a href="https://www.youtube.com/shorts/K04ckT7Gq1o" target='_blank' 
+           className="text-gray-700 hover:bg-gray-100 px-3 py-1 transition-colors border border-gray-300 rounded">
+          Documentation
+        </a>
+        <a href="https://www.youtube.com/watch?v=-g03jC71GBw" target='_blank' 
+           className="text-gray-700 hover:bg-gray-100 px-3 py-1 transition-colors border border-gray-300 rounded">
+          Contact Support
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
  {/* Toggle Sidebar Button and Ready Notification */}
         {result && (
           <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
             {/* Ready Notification */}
             {showReadyNotification && (
-              <div className="px-4 py-2 border-2 border-black-400 bg-black-900 text-black-400 font-mono text-sm animate-pulse">
-                [RESULTS.READY] ✓
+              <div className="px-4 py-2 border-2 border-gray-700 bg-gray-50 text-gray-800 text-sm animate-pulse rounded-lg shadow-lg">
+                Results Ready ✓
               </div>
             )}
             
@@ -296,260 +349,193 @@ export default function Home() {
                 setSidebarOpen(!sidebarOpen);
                 setShowReadyNotification(false);
               }}
-              className="px-4 py-2 border-2 border-black-400 bg-black text-black-400 hover:bg-black-900 font-mono text-sm transition-all"
+              className="px-4 py-2 border-2 border-gray-700 bg-white text-gray-800 hover:bg-gray-50 text-sm transition-all rounded-lg shadow-md"
             >
-              {sidebarOpen ? '[CLOSE.RESULTS]' : '[OPEN.RESULTS]'}
+              {sidebarOpen ? 'Close Results' : 'View Results'}
             </button>
           </div>
         )}
 
 
 
-        {/* Generator Section */}
-        <section id="generator" className="py-16">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="bg-black p-8 md:p-12 border-4 border-black-400 font-mono">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 tracking-wider text-black-400">
-                &gt;&gt; GENERATE.TEST.CASES &lt;&lt;
-              </h2>
-              
-              <div className="space-y-8">
-                {/* Input Area */}
-                <div>
-                  <label className="block text-lg font-semibold mb-4 font-mono tracking-wider text-black-400">
-                    [INPUT_TEST_DESCRIPTION]
-                  </label>
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="EXAMPLE: USER.LOGIN.SYSTEM WITH EMAIL.VALIDATION, PASSWORD.ENCRYPTION, AND REMEMBER.ME.FUNCTIONALITY..."
-                    className="w-full h-32 p-4 border-4 border-black-400 focus:outline-none focus:border-black-300 text-lg resize-none font-mono bg-black text-black-400"
-                    disabled={loading}
-                  />
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setInput("User authentication system with email/password login, password reset, and account lockout after failed attempts")}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
-                    style={{ backgroundColor: '#ffffffff', color: '#000000ff' }}
-                    disabled={loading}
-                  >
-                    🔐 Login System
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInput("E-commerce checkout process with cart validation, payment processing, inventory check, and order confirmation")}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
-                    style={{ backgroundColor: '#00e5ffff', color: '#000000ff' }}
-                    disabled={loading}
-                  >
-                    🛒 Checkout Flow
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInput("REST API for user management with CRUD operations, authentication, rate limiting, and data validation")}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
-                    style={{ backgroundColor: '#006809ff', color: '#ffffffff' }}
-                    disabled={loading}
-                  >
-                    � API Testing
-                  </button>
-                </div>
+{/* Generator Section */}
+<section id="generator" className="py-8">
+  <div className="max-w-3xl mx-auto px-4">
+    <div className="bg-white p-6 md:p-8 border border-gray-200 rounded-lg shadow">
+      <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-gray-900">
+        Generate Test Cases
+      </h2>
+      
+      <div className="space-y-6">
+        {/* Input Mode Toggle */}
+        <div>
+          <label className="block text-base font-semibold mb-3 text-gray-800">
+            Choose Input Method
+          </label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => handleModeChange('description')}
+              className={`flex-1 py-2 px-4 rounded-md border transition-all text-sm font-medium ${
+                inputMode === 'description'
+                  ? 'bg-gray-600 text-white border-gray-600 shadow'
+                  : 'bg-gray-100 text-gray-700 border-gray-300 hover:border-gray-500'
+              }`}
+              disabled={loading}
+            >
+              📝 Text
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleModeChange('files')}
+              className={`flex-1 py-2 px-4 rounded-md border transition-all text-sm font-medium ${
+                inputMode === 'files'
+                  ? 'bg-gray-600 text-white border-gray-600 shadow'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'
+              }`}
+              disabled={loading}
+            >
+              📁 Files
+            </button>
+          </div>
+        </div>
+
+        {/* Conditional Input Areas */}
+        {inputMode === 'description' ? (
+          <div>
+            <label className="block text-base font-semibold mb-3 text-gray-800">
+              Test Description
+            </label>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Example: User login system with email validation..."
+              className="w-full h-24 p-3 border border-gray-300 focus:outline-none focus:border-gray-500 text-sm resize-none bg-white text-gray-800 rounded-md"
+              disabled={loading}
+            />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setInput("User authentication system with email/password login")}
+                className="px-3 py-1.5 rounded-md text-xs font-medium transition-all hover:scale-105"
+                style={{ backgroundColor: '#ece6bfff', color: '#000000ff' }}
+                disabled={loading}
+              >
+                🔐 Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setInput("E-commerce checkout process with cart validation")}
+                className="px-3 py-1.5 rounded-md text-xs font-medium transition-all hover:scale-105"
+                style={{ backgroundColor: '#00e5ffff', color: '#000000ff' }}
+                disabled={loading}
+              >
+                🛒 Checkout
+              </button>
+              <button
+                type="button"
+                onClick={() => setInput("REST API for user management with CRUD operations")}
+                className="px-3 py-1.5 rounded-md text-xs font-medium transition-all hover:scale-105"
+                style={{ backgroundColor: '#006809ff', color: '#ffffffff' }}
+                disabled={loading}
+              >
+                🔧 API
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-base font-semibold mb-3 text-gray-800">
+              Upload Files
+            </label>
+<div className="mb-4 p-3 border-2 border-orange-300 bg-orange-50 rounded-lg"> <p className="text-orange-700 text-sm"> 📋 <strong>Supported files:</strong> JSON schemas, OpenAPI specs, database schemas, form definitions, React components, API documentation, requirements docs (.json, .yaml, .ts, .jsx, .md, .sql, etc.) </p> <p className="text-orange-600 text-xs mt-1"> ⚠️ Keep files under 100KB total for optimal processing </p> </div>
+            <div
+              className={`w-full h-24 border-2 border-dashed transition-all flex items-center justify-center cursor-pointer rounded-md ${
+                dragActive 
+                  ? 'border-gray-500 bg-gray-50' 
+                  : 'border-gray-300 hover:border-gray-500 bg-gray-50'
+              }`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => document.getElementById('fileInput')?.click()}
+            >
+              <div className="text-center text-gray-700 text-sm">
+                <div className="text-xl mb-1">📁</div>
+                {dragActive ? 'Drop files here' : 'Click or drag files here'}
               </div>
+            </div>
 
-                {/* File Upload Section */}
-                <div>
-                  <label className="block text-lg font-semibold mb-4 font-mono tracking-wider text-black-400">
-                    [UPLOAD_REFERENCE_FILES] <span className="text-sm text-yellow-400">(OPTIONAL)</span>
-                  </label>
-                  
-                  {/* Free Tier Warning */}
-                  <div className="mb-4 p-3 border-2 border-yellow-400 bg-yellow-900 bg-opacity-20">
-                    <p className="text-yellow-400 font-mono text-sm">
-                      ⚠️ [FREE.TIER.LIMITS] Keep files under 100KB total. Text files only: .txt, .json, .csv, .xml, .md, .js, .ts, etc.
-                    </p>
-                  </div>
-                  
-                  {/* Drop Zone */}
-                  <div
-                    className={`w-full h-32 border-4 border-dashed transition-all font-mono flex items-center justify-center cursor-pointer ${
-                      dragActive 
-                        ? 'border-black-300 bg-black-900 bg-opacity-20' 
-                        : 'border-black-400 hover:border-black-300'
-                    }`}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onClick={() => document.getElementById('fileInput')?.click()}
-                  >
-                    <div className="text-center text-black-400">
-                      <div className="text-2xl mb-2">📁</div>
-                      <p className="font-mono">
-                        {dragActive ? '[DROP.FILES.HERE]' : '[CLICK.OR.DRAG.FILES.HERE]'}
-                      </p>
-                      <p className="text-sm text-black-300 font-mono mt-1">
-                        TEXT.FILES.ONLY • MAX.100KB.EACH
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <input
-                    id="fileInput"
-                    type="file"
-                    multiple
-                    accept=".txt,.json,.csv,.xml,.html,.css,.js,.ts,.md,.yml,.yaml,.log,.sql"
-                    onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                    className="hidden"
-                    disabled={loading}
-                  />
-                  
-                  {/* File List */}
-                  {uploadedFiles.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-black-400 font-mono text-sm font-semibold">
-                          [UPLOADED.FILES] ({uploadedFiles.length})
-                        </span>
-                        <span className="text-black-300 font-mono text-xs">
-                          TOTAL: {(getTotalFileSize() / 1024).toFixed(1)}KB
-                        </span>
-                      </div>
-                      
-                      {uploadedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 border border-black-400 bg-black">
-                          <div className="flex-1">
-                            <span className="text-black-400 font-mono text-sm">{file.name}</span>
-                            <span className="text-black-300 font-mono text-xs ml-2">
-                              ({(file.size / 1024).toFixed(1)}KB)
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => removeFile(index)}
-                            className="text-red-400 hover:text-red-300 font-mono text-sm px-2 py-1 border border-red-400 hover:bg-red-900 transition-colors"
-                            disabled={loading}
-                          >
-                            [X]
-                          </button>
-                        </div>
-                      ))}
-                      
-                      {getTotalFileSize() > 80 * 1024 && (
-                        <div className="text-yellow-400 font-mono text-xs mt-2">
-                          ⚠️ Approaching 100KB limit. Consider removing some files.
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+            <input
+              id="fileInput"
+              type="file"
+              multiple
+              accept=".txt,.json,.csv,.xml,.html,.css,.js,.ts,.md,.yml,.yaml,.log,.sql"
+              onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+              className="hidden"
+              disabled={loading}
+            />
+            
+          </div>
 
-                {/* Test Type Selection */}
-                <div>
-                  <label className="block text-lg font-semibold mb-4 font-mono tracking-wider text-black-400">
-                    [TEST_TYPE_SELECTION]
-                  </label>
-                  <select
-                    value={testType}
-                    onChange={(e) => setTestType(e.target.value)}
-                    className="w-full p-4 border-4 border-black-400 focus:outline-none focus:border-black-300 text-lg font-mono bg-black text-black-400"
-                    disabled={loading}
-                  >
-                    <option value="">[ALL_TYPES] COMPREHENSIVE.TESTING</option>
-                    <option value="Unit Tests">[UNIT_TESTS]</option>
-                    <option value="Integration Tests">[INTEGRATION_TESTS]</option>
-                    <option value="API Tests">[API_TESTS]</option>
-                    <option value="UI Tests">[UI_TESTS]</option>
-                    <option value="Security Tests">[SECURITY_TESTS]</option>
-                    <option value="Performance Tests">[PERFORMANCE_TESTS]</option>
-                    <option value="Accessibility Tests">[ACCESSIBILITY_TESTS]</option>
-                  </select>
-                </div>
+        )}
 
-                {/* Generate Button */}
-                <button
-                  onClick={generateTestCases}
-                  disabled={loading || !input.trim()}
-                  className="w-full py-6 px-8 border-4 border-black-400 text-xl font-bold font-mono tracking-wider transition-all hover:bg-black-900 disabled:opacity-50 disabled:cursor-not-allowed bg-black text-black-400"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center font-mono">
-                      <span className="animate-pulse mr-4">[PROCESSING...]</span>
-                      AI.ANALYZING.AND.GENERATING.TEST.CASES
-                      {uploadedFiles.length > 0 && (
-                        <span className="ml-2 text-sm">+ {uploadedFiles.length} FILES</span>
-                      )}
-                    </span>
-                  ) : (
-                    <span>
-                      &gt;&gt; GENERATE.PROFESSIONAL.TEST.CASES &lt;&lt;
-                      {uploadedFiles.length > 0 && (
-                        <span className="block text-sm mt-1 text-black-300">
-                          INCLUDING {uploadedFiles.length} UPLOADED FILE{uploadedFiles.length !== 1 ? 'S' : ''}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                </button>
+        {/* Test Type Selection */}
+        <div>
+          <label className="block text-base font-semibold mb-3 text-gray-800">
+            Test Type
+          </label>
+          <select
+            value={testType}
+            onChange={(e) => setTestType(e.target.value)}
+            className="w-full p-3 border border-gray-300 focus:outline-none focus:border-gray-500 text-sm bg-white text-gray-800 rounded-md"
+            disabled={loading}
+          >
+            <option value="">All Types</option>
+            <option value="Unit Tests">Unit Tests</option>
+            <option value="Integration Tests">Integration Tests</option>
+            <option value="API Tests">API Tests</option>
+            <option value="UI Tests">UI Tests</option>
+          </select>
+        </div>
 
-                    {/* Error Display */}
-                    {error && (
-                      <div className="p-4 border-4 border-red-400 bg-red-900 font-mono">
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-3 font-mono text-red-400">[ERROR]</span>
-                          <div>
-                            <h4 className="font-semibold text-red-400 font-mono tracking-wider">SYSTEM.ERROR</h4>
-                            <p className="text-red-300 font-mono">{error}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+        {/* Generate Button */}
+        <button
+          onClick={generateTestCases}
+          disabled={loading || (inputMode === 'description' && !input.trim()) || (inputMode === 'files' && uploadedFiles.length === 0)}
+          className="w-full py-3 px-6 border border-gray-600 text-base font-bold transition-all hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed bg-gray-600 text-white rounded-md shadow"
+        >
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <span className="animate-pulse mr-2">Processing...</span>
+              AI Generating...
+            </span>
+          ) : (
+            "Generate Test Cases"
+          )}
+        </button>
 
+        {/* Error Display */}
+        {error && (
+          <div className="p-3 border border-red-300 bg-red-50 rounded-md text-sm text-red-600">
+            ⚠️ {error}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
 
-              
-            </section>
 
             
 
-                    <footer className="py-12 border-t-4 border-black-400 font-mono bg-black">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center">
-              <div className="flex items-center justify-center space-x-3 mb-6">
-                <div className="w-8 h-8 border-2 border-black-400 flex items-center justify-center text-black-400 font-bold bg-black">
-                  T
-                </div> 
-                <h3 className="text-xl font-bold text-black-400 font-mono tracking-wider">TESTCASE.GEN</h3>
-              </div>
-              <p className="text-black-400 mb-6 opacity-90 font-mono">
-                POWERED.BY.GOOGLE.GEMINI.AI • BUILT.FOR.DEVELOPERS.AND.QA.PROFESSIONALS
-              </p>
-              <div className="flex justify-center space-x-6">
-                <a href="https://github.com/Thonjen/ai-testcase-generator" target="_blank" rel="noopener noreferrer" 
-                   className="text-black-400 hover:bg-black-900 px-3 py-1 transition-colors font-mono border border-black-400">
-                  [GITHUB.REPOSITORY]
-                </a>
-                <a href="https://www.youtube.com/shorts/K04ckT7Gq1o" target='_blank' className="text-black-400 hover:bg-black-900 px-3 py-1 transition-colors font-mono border border-black-400">
-                  [DOCUMENTATION]
-                </a>
-                <a href="https://www.youtube.com/watch?v=-g03jC71GBw" target='_blank' className="text-black-400 hover:bg-black-900 px-3 py-1 transition-colors font-mono border border-black-400">
-                  [CONTACT.SUPPORT]
-                </a>
-              </div>
-              <div className="mt-6 pt-6 border-t border-black-400 border-opacity-20">
-                <p className="text-black-400 opacity-75 text-sm font-mono tracking-wider">
-                  (C) 2025 TESTCASE.GEN • MADE.WITH.LOVE.FOR.BETTER.TESTING
-                </p>
-              </div>
-            </div>
-          </div>
-        </footer>
           </div>
 
           {/* Right Sidebar - Results */}
           {result && sidebarOpen && (
             <div 
-              className="fixed right-0 top-0 min-h-screen border-l-4 border-black-400 bg-gray-900 transition-all duration-300 ease-in-out flex z-40"
+              className="fixed right-0 top-0 min-h-screen border-l-2 border-gray-200 bg-white transition-all duration-300 ease-in-out flex z-40"
               style={{ 
                 width: `${sidebarWidth}%`,
                 height: '100vh',
@@ -558,10 +544,10 @@ export default function Home() {
             >
               {/* Resize Handle */}
               <div
-                className="w-1 bg-black-400 hover:bg-black-300 cursor-ew-resize flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+                className="w-1 bg-gray-300 hover:bg-gray-400 cursor-ew-resize flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
                 onMouseDown={handleMouseDown}
                 style={{
-                  background: isResizing ? '#00ff00' : '#4ade80'
+                  background: isResizing ? '#d97706' : '#fbbf24'
                 }}
               >
                 <div className="w-full h-full flex items-center justify-center">
@@ -571,39 +557,39 @@ export default function Home() {
               
               {/* Sidebar Content */}
               <div className="flex-1 flex flex-col h-full overflow-hidden">
-              <div className="flex-shrink-0 bg-gray-900 border-b-4 border-black-400 p-6">
-                <h2 className="text-2xl font-bold font-mono tracking-wider text-black-400">
-                  [RESULTS.PANEL]
+              <div className="flex-shrink-0 bg-white border-b-2 border-gray-200 p-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Results Panel
                 </h2>
-                <p className="text-black-300 font-mono">
-                  {result.title?.toUpperCase() || 'TEST.CASES.GENERATED'}
+                <p className="text-gray-700">
+                  {result.title || 'Test Cases Generated'}
                 </p>
                 {result.testCases && (
                   <div className="space-y-3 mt-3">
                     {/* Priority Filter */}
                     <div>
-                      <label className="block text-sm font-semibold mb-2 font-mono tracking-wider text-black-400">
-                        [FILTER.BY.PRIORITY]
+                      <label className="block text-sm font-semibold mb-2 text-gray-800">
+                        Filter by Priority
                       </label>
                       <select
                         value={priorityFilter}
                         onChange={(e) => setPriorityFilter(e.target.value)}
-                        className="w-full p-2 border-2 border-black-400 focus:outline-none focus:border-black-300 text-sm font-mono bg-black text-black-400"
+                        className="w-full p-2 border-2 border-gray-300 focus:outline-none focus:border-gray-500 text-sm bg-white text-gray-800 rounded"
                       >
-                        <option value="all">[ALL] ({result.testCases.length})</option>
-                        <option value="high">[HIGH] ({result.testCases.filter(tc => tc.priority === 'high').length})</option>
-                        <option value="medium">[MEDIUM] ({result.testCases.filter(tc => tc.priority === 'medium').length})</option>
-                        <option value="low">[LOW] ({result.testCases.filter(tc => tc.priority === 'low').length})</option>
+                        <option value="all">All ({result.testCases.length})</option>
+                        <option value="high">High ({result.testCases.filter(tc => tc.priority === 'high').length})</option>
+                        <option value="medium">Medium ({result.testCases.filter(tc => tc.priority === 'medium').length})</option>
+                        <option value="low">Low ({result.testCases.filter(tc => tc.priority === 'low').length})</option>
                       </select>
                     </div>
                     
                     {/* Statistics */}
                     <div className="flex flex-wrap gap-2">
-                      <div className="px-3 py-1 border-2 border-black-400 font-semibold bg-black text-black-400 font-mono text-sm">
-                        SHOWING: {filteredTestCases.length}
+                      <div className="px-3 py-1 border-2 border-gray-600 font-semibold bg-gray-100 text-gray-800 text-sm rounded">
+                        Showing: {filteredTestCases.length}
                       </div>
-                      <div className="px-3 py-1 border-2 border-blue-400 font-semibold bg-black text-blue-400 font-mono text-sm">
-                        TOTAL: {result.testCases.length}
+                      <div className="px-3 py-1 border-2 border-blue-500 font-semibold bg-blue-100 text-blue-800 text-sm rounded">
+                        Total: {result.testCases.length}
                       </div>
                     </div>
                   </div>
@@ -613,15 +599,15 @@ export default function Home() {
                 <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={copyToClipboard}
-                    className="px-4 py-2 border-2 border-black-400 font-semibold transition-all hover:bg-black-900 flex items-center gap-2 font-mono bg-black text-black-400 text-sm"
+                    className="px-4 py-2 border-2 border-gray-600 font-semibold transition-all hover:bg-gray-100 flex items-center gap-2 bg-white text-gray-800 text-sm rounded"
                   >
-                    📋 [COPY.JSON]
+                    📋 Copy JSON
                   </button>
                   <button
                     onClick={downloadTestCases}
-                    className="px-4 py-2 border-2 border-black-400 font-semibold transition-all hover:bg-black-800 flex items-center gap-2 font-mono bg-black-700 text-black text-sm"
+                    className="px-4 py-2 border-2 border-gray-600 font-semibold transition-all hover:bg-gray-200 flex items-center gap-2 bg-gray-100 text-gray-800 text-sm rounded"
                   >
-                    💾 [DOWNLOAD.JSON]
+                    💾 Download JSON
                   </button>
                   <button
                     onClick={() => {
@@ -631,9 +617,9 @@ export default function Home() {
                       const filename = priorityFilter === 'all' ? 'test-cases.csv' : `test-cases-${priorityFilter}.csv`;
                       downloadCSV(csv, filename);
                     }}
-                    className="px-4 py-2 border-2 border-black-400 font-semibold transition-all hover:bg-black-900 flex items-center gap-2 font-mono bg-black text-black-400 text-sm"
+                    className="px-4 py-2 border-2 border-gray-600 font-semibold transition-all hover:bg-gray-100 flex items-center gap-2 bg-white text-gray-800 text-sm rounded"
                   >
-                    📊 [EXPORT.CSV]
+                    📊 Export CSV
                   </button>
                 </div>
               </div>
@@ -654,63 +640,63 @@ export default function Home() {
                   <div className="space-y-4">
                     {filteredTestCases.length > 0 ? (
                       filteredTestCases.map((testCase, index) => (
-                      <div key={testCase.id || index} className="border-2 border-black-400 bg-black font-mono">
+                      <div key={testCase.id || index} className="border-2 border-gray-200 bg-white rounded-lg shadow-sm">
                         {/* Accordion Header */}
                         <button
                           onClick={() => setExpandedTestCase(expandedTestCase === index ? null : index)}
-                          className="w-full p-4 text-left hover:bg-black-900 transition-colors flex items-center justify-between"
+                          className="w-full p-4 text-left hover:bg-gray-50 transition-colors flex items-center justify-between rounded-t-lg"
                         >
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold font-mono tracking-wider text-black-400">
-                              [{testCase.id}] {testCase.title?.toUpperCase() || `TEST.CASE.${index + 1}`}
+                            <h3 className="text-lg font-bold text-gray-900">
+                              [{testCase.id}] {testCase.title || `Test Case ${index + 1}`}
                             </h3>
-                            <p className="text-sm text-black-300 font-mono mt-1">
-                              {testCase.category?.toUpperCase()} • {testCase.priority?.toUpperCase()}.PRIORITY
+                            <p className="text-sm text-gray-700 mt-1">
+                              {testCase.category} • {testCase.priority} Priority
                             </p>
                           </div>
-                          <span className="text-black-400 font-mono text-xl ml-4">
+                          <span className="text-gray-700 text-xl ml-4">
                             {expandedTestCase === index ? '[-]' : '[+]'}
                           </span>
                         </button>
 
                         {/* Accordion Content */}
                         {expandedTestCase === index && (
-                          <div className="border-t-2 border-black-400 p-4 space-y-4">
+                          <div className="border-t-2 border-gray-200 p-4 space-y-4">
                             {/* Description */}
                             <div>
-                              <h4 className="text-sm font-bold mb-2 font-mono tracking-wider text-black-400">
-                                [DESCRIPTION]
+                              <h4 className="text-sm font-bold mb-2 text-gray-800">
+                                Description
                               </h4>
-                              <p className="text-black-300 font-mono text-sm">
-                                {testCase.description?.toUpperCase()}
+                              <p className="text-gray-700 text-sm">
+                                {testCase.description}
                               </p>
                             </div>
 
                             {/* Preconditions */}
                             {testCase.preconditions && (
                               <div>
-                                <h4 className="text-sm font-bold mb-2 font-mono tracking-wider text-black-400">
-                                  [PREREQUISITES]
+                                <h4 className="text-sm font-bold mb-2 text-gray-800">
+                                  Prerequisites
                                 </h4>
-                                <p className="text-black-300 font-mono text-sm">
-                                  {testCase.preconditions.toUpperCase()}
+                                <p className="text-gray-700 text-sm">
+                                  {testCase.preconditions}
                                 </p>
                               </div>
                             )}
 
                             {/* Test Steps */}
                             <div>
-                              <h4 className="text-sm font-bold mb-2 font-mono tracking-wider text-black-400">
-                                [TEST.STEPS]
+                              <h4 className="text-sm font-bold mb-2 text-gray-800">
+                                Test Steps
                               </h4>
                               <ol className="space-y-1">
                                 {testCase.testSteps?.map((step, stepIndex) => (
                                   <li key={stepIndex} className="flex items-start gap-2">
-                                    <span className="flex-shrink-0 w-5 h-5 border border-black-400 flex items-center justify-center text-xs font-bold font-mono text-black-400">
+                                    <span className="flex-shrink-0 w-5 h-5 border border-gray-600 flex items-center justify-center text-xs font-bold text-gray-800 bg-gray-100 rounded-full">
                                       {stepIndex + 1}
                                     </span>
-                                    <span className="text-black-300 font-mono text-sm">
-                                      {step.replace(/^Step \d+:\s*/, '').replace(/^\d+\.\s*/, '').toUpperCase()}
+                                    <span className="text-gray-700 text-sm">
+                                      {step.replace(/^Step \d+:\s*/, '').replace(/^\d+\.\s*/, '')}
                                     </span>
                                   </li>
                                 ))}
@@ -719,32 +705,32 @@ export default function Home() {
 
                             {/* Input Data */}
                             <div>
-                              <h4 className="text-sm font-bold mb-2 font-mono tracking-wider text-black-400">
-                                [INPUT.DATA]
+                              <h4 className="text-sm font-bold mb-2 text-gray-800">
+                                Input Data
                               </h4>
-                              <div className="p-3 border border-black-400 bg-gray-800">
+                              <div className="p-3 border border-gray-300 bg-gray-50 rounded">
                                 {typeof testCase.inputData === 'object' ? (
-                                  <pre className="text-xs whitespace-pre-wrap text-black-300 font-mono">
+                                  <pre className="text-xs whitespace-pre-wrap text-gray-700">
                                     {JSON.stringify(testCase.inputData, null, 2)}
                                   </pre>
                                 ) : (
-                                  <span className="text-black-300 font-mono text-sm">{testCase.inputData?.toUpperCase()}</span>
+                                  <span className="text-gray-700 text-sm">{testCase.inputData}</span>
                                 )}
                               </div>
                             </div>
 
                             {/* Expected Result */}
                             <div>
-                              <h4 className="text-sm font-bold mb-2 font-mono tracking-wider text-black-400">
-                                [EXPECTED.RESULT]
+                              <h4 className="text-sm font-bold mb-2 text-gray-800">
+                                Expected Result
                               </h4>
-                              <div className="p-3 border border-black-400 bg-gray-800">
+                              <div className="p-3 border border-gray-300 bg-gray-50 rounded">
                                 {typeof testCase.expectedResult === 'object' ? (
-                                  <pre className="text-xs whitespace-pre-wrap text-black-300 font-mono">
+                                  <pre className="text-xs whitespace-pre-wrap text-gray-700">
                                     {JSON.stringify(testCase.expectedResult, null, 2)}
                                   </pre>
                                 ) : (
-                                  <span className="text-black-300 font-mono text-sm">{testCase.expectedResult?.toUpperCase()}</span>
+                                  <span className="text-gray-700 text-sm">{testCase.expectedResult}</span>
                                 )}
                               </div>
                             </div>
@@ -752,13 +738,13 @@ export default function Home() {
                             {/* Tags */}
                             {testCase.tags && testCase.tags.length > 0 && (
                               <div>
-                                <h4 className="text-sm font-bold mb-2 font-mono tracking-wider text-black-400">
-                                  [TAGS]
+                                <h4 className="text-sm font-bold mb-2 text-gray-800">
+                                  Tags
                                 </h4>
                                 <div className="flex flex-wrap gap-1">
                                   {testCase.tags.map((tag, tagIndex) => (
-                                    <span key={tagIndex} className="px-2 py-1 border border-black-400 text-xs font-medium font-mono text-black-400">
-                                      {tag.toUpperCase()}
+                                    <span key={tagIndex} className="px-2 py-1 border border-gray-400 text-xs font-medium text-gray-800 bg-gray-100 rounded">
+                                      {tag}
                                     </span>
                                   ))}
                                 </div>
@@ -769,43 +755,43 @@ export default function Home() {
                       </div>
                     ))
                     ) : (
-                      <div className="text-center py-8 font-mono">
-                        <div className="text-2xl mb-3 text-yellow-400">🔍 [NO.MATCHES]</div>
-                        <p className="text-lg font-mono tracking-wider text-yellow-300">
-                          NO.TEST.CASES.MATCH.PRIORITY: {priorityFilter.toUpperCase()}
+                      <div className="text-center py-8">
+                        <div className="text-2xl mb-3 text-orange-600">🔍 No Matches</div>
+                        <p className="text-lg text-orange-700">
+                          No test cases match priority: {priorityFilter}
                         </p>
                         <button
                           onClick={() => setPriorityFilter('all')}
-                          className="mt-4 px-4 py-2 border-2 border-black-400 font-semibold transition-all hover:bg-black-900 font-mono bg-black text-black-400 text-sm"
+                          className="mt-4 px-4 py-2 border-2 border-gray-600 font-semibold transition-all hover:bg-gray-100 bg-white text-gray-800 text-sm rounded"
                         >
-                          [SHOW.ALL]
+                          Show All
                         </button>
                       </div>
                     )}
                   </div>
                 ) : result.rawResponse ? (
-                  <div className="border-2 border-red-400 p-4 font-mono">
-                    <h3 className="text-lg font-bold mb-3 font-mono tracking-wider text-red-400">
-                      [PARSING.ERROR]
+                  <div className="border-2 border-red-300 p-4 rounded-lg">
+                    <h3 className="text-lg font-bold mb-3 text-red-700">
+                      Parsing Error
                     </h3>
-                    <div className="p-3 bg-red-900 border border-red-400 mb-4 font-mono">
-                      <p className="text-red-300 font-medium text-sm">
-                        THE.AI.RESPONSE.COULD.NOT.BE.PARSED.AS.JSON
+                    <div className="p-3 bg-red-50 border border-red-300 mb-4 rounded">
+                      <p className="text-red-600 font-medium text-sm">
+                        The AI response could not be parsed as JSON
                       </p>
                       {result.parseError && (
-                        <p className="text-xs text-red-400 mt-2 font-mono">ERROR: {result.parseError}</p>
+                        <p className="text-xs text-red-500 mt-2">Error: {result.parseError}</p>
                       )}
                     </div>
-                    <div className="p-3 border border-black-400 max-h-64 overflow-y-auto bg-gray-800">
-                      <pre className="whitespace-pre-wrap text-xs font-mono text-black-300">
+                    <div className="p-3 border border-gray-300 max-h-64 overflow-y-auto bg-gray-50 rounded">
+                      <pre className="whitespace-pre-wrap text-xs text-gray-700">
                         {result.rawResponse}
                       </pre>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 font-mono">
-                    <div className="text-4xl mb-3 text-black-400">[NO.DATA]</div>
-                    <p className="text-lg font-mono tracking-wider text-black-300">NO.TEST.CASES.GENERATED</p>
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-3 text-gray-600">No Data</div>
+                    <p className="text-lg text-gray-700">No test cases generated</p>
                   </div>
                 )}
               </div>
