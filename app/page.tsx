@@ -519,7 +519,7 @@ export default function Home() {
                 <div className="w-8 h-8 border-2 border-black-400 flex items-center justify-center text-black-400 font-bold bg-black">
                   T
                 </div> 
-                <h3 className="text-xl font-bold  text-black-400 font-mono tracking-wider">TESTCASE.GEN</h3>
+                <h3 className="text-xl font-bold text-black-400 font-mono tracking-wider">TESTCASE.GEN</h3>
               </div>
               <p className="text-black-400 mb-6 opacity-90 font-mono">
                 POWERED.BY.GOOGLE.GEMINI.AI • BUILT.FOR.DEVELOPERS.AND.QA.PROFESSIONALS
