@@ -1,36 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤖 AI Test Case Generator
 
-## Getting Started
+An intelligent test case generator powered by Google's Gemini AI that creates comprehensive test cases from feature descriptions, requirements, or code snippets.
 
-First, run the development server:
+## ✨ Features
+
+- **AI-Powered Generation**: Uses Google Gemini 1.5 Flash for intelligent test case creation
+- **Comprehensive Test Cases**: Generates positive, negative, edge cases, and boundary conditions
+- **Structured Output**: Well-formatted test cases with priorities, categories, and detailed steps
+- **Export Functionality**: Download test cases as JSON files
+- **Beautiful UI**: Clean, responsive interface built with Tailwind CSS
+- **Free to Start**: Use Google AI Studio's free tier to get started
+
+## 🚀 Live Demo
+
+Deploy your own instance on Vercel:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/ai-testcase-generator&env=GEMINI_API_KEY)
+
+## 🛠️ Setup Instructions
+
+### 1. Get Google Gemini API Key
+
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Create a new API key
+3. Copy the key for later use
+
+### 2. Deploy on Vercel
+
+#### Option A: One-Click Deploy
+1. Click the "Deploy with Vercel" button above
+2. Connect your GitHub account
+3. Add your `GEMINI_API_KEY` in the environment variables
+4. Deploy!
+
+#### Option B: Manual Deploy
+1. Fork this repository
+2. Connect to Vercel
+3. Add environment variable:
+   - `GEMINI_API_KEY`: Your Google Gemini API key
+4. Deploy
+
+### 3. Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/ai-testcase-generator.git
+cd ai-testcase-generator
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.local.example .env.local
+
+# Add your API key to .env.local
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📋 Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Enter Description**: Describe the feature, function, or requirement you want to test
+2. **Specify Test Type** (Optional): Add context like "Unit Tests", "Integration Tests", etc.
+3. **Generate**: Click "Generate Test Cases" and wait for AI magic
+4. **Review & Export**: Review the generated test cases and download as JSON
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Example Inputs
 
-## Learn More
+- "User login functionality with email and password validation"
+- "Shopping cart checkout process with payment integration"
+- "File upload feature with size and type restrictions"
+- "API endpoint for user registration with validation"
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Test Case Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Generated test cases include:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **ID & Title**: Unique identifier and descriptive title
+- **Description**: What the test case validates
+- **Category**: positive, negative, edge_case, boundary
+- **Priority**: high, medium, low
+- **Preconditions**: Setup requirements
+- **Test Steps**: Detailed step-by-step instructions
+- **Input Data**: Test data to use
+- **Expected Result**: What should happen
+- **Tags**: Categorization tags
 
-## Deploy on Vercel
+## 💰 Cost & Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Free Options
+- **Google AI Studio**: Free tier with daily quotas
+- **Vercel**: Free hosting for personal projects
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Paid Options
+- **Google Cloud Vertex AI**: ~$10/month credits
+- **Vercel Pro**: For high-traffic production apps
+
+## 🔧 API Reference
+
+### POST /api/generate
+
+Generate test cases from input description.
+
+**Request Body:**
+```json
+{
+  "input": "User login functionality",
+  "testType": "Integration Tests" // optional
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "testSuite": {
+      "title": "User Login Test Suite",
+      "description": "Comprehensive tests for login functionality",
+      "testCases": [...]
+    }
+  }
+}
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Google Gemini AI** for powerful language generation
+- **Vercel** for seamless deployment platform
+- **Next.js** for the amazing React framework
+- **Tailwind CSS** for beautiful styling
