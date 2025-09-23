@@ -75,7 +75,7 @@ export default function ThemeToggle({ onThemeChange }: ThemeToggleProps) {
             hover:scale-105 focus-visible:outline-none focus-visible:ring-2
             ${theme.ariaChecked 
               ? 'bg-amber-900 border-amber-700 text-amber-100 dark:bg-amber-100 dark:border-amber-300 dark:text-amber-900' 
-              : 'bg-transparent border-amber-700 text-amber-700 hover:bg-amber-50 dark:border-amber-300 dark:text-amber-300 dark:hover:bg-amber-900/20'
+              : 'bg-transparent  border-amber-700 text-amber-700 hover:bg-amber-50 dark:border-amber-300 dark:text-amber-300 dark:hover:bg-amber-900/20'
             }
           `}
           aria-label={theme.label}

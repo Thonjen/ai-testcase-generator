@@ -62,7 +62,7 @@ Please generate test cases in the following JSON format. Make sure the JSON is v
 }
 
 Guidelines:
-- Include positive test cases (happy path scenarios)
+- Include positive test cases  (happy path scenarios)
 - Include negative test cases (error handling scenarios)
 - Include edge cases and boundary conditions
 - Include security test cases if applicable
