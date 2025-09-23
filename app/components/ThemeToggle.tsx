@@ -7,7 +7,7 @@ export type Theme = 'light' | 'dark' | 'system';
 interface ThemeToggleProps {
   onThemeChange?: (theme: Theme) => void;
 }
-
+ 
 export default function ThemeToggle({ onThemeChange }: ThemeToggleProps) {
   const [currentTheme, setCurrentTheme] = useState<Theme>('light');
 

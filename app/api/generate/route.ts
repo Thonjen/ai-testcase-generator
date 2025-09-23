@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
+ 
 export async function POST(request: NextRequest) {
   try {
     const { input, testType, uploadedFiles } = await request.json();

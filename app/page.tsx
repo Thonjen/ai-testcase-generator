@@ -518,7 +518,7 @@ export default function Home() {
               <div className="flex items-center justify-center space-x-3 mb-6">
                 <div className="w-8 h-8 border-2 border-black-400 flex items-center justify-center text-black-400 font-bold bg-black">
                   T
-                </div>
+                </div> 
                 <h3 className="text-xl font-bold text-black-400 font-mono tracking-wider">TESTCASE.GEN</h3>
               </div>
               <p className="text-black-400 mb-6 opacity-90 font-mono">
