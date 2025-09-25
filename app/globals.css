@@ -28,10 +28,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d97706;
+  background: #8f8e8e;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b45309;
+  background: #acabaa;
 }

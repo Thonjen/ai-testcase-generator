@@ -547,7 +547,7 @@ export default function Home() {
                 className="w-1 bg-gray-300 hover:bg-gray-400 cursor-ew-resize flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
                 onMouseDown={handleMouseDown}
                 style={{
-                  background: isResizing ? '#d97706' : '#fbbf24'
+                  background: isResizing ? '#cabdaeff' : '#f7f1e3ff'
                 }}
               >
                 <div className="w-full h-full flex items-center justify-center">
